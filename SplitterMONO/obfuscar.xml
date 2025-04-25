@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<Obfuscator>
+  <!-- Path Input/Output -->
+  <Var name="InPath" value=".\bin\Debug\.netstandard2.1" />    <!-- Folder DLL asli -->
+  <Var name="OutPath" value=".\obfuscar" />  <!-- Folder hasil obfuscate -->
+
+   <!-- Pengaturan Utama -->
+  <Var name="KeepPublicApi" value="true" />       <!-- Pertahankan nama public API -->
+  <Var name="RenameProperties" value="true" />    <!-- Rename properties -->
+  <Var name="RenameFields" value="true" />        <!-- Rename fields -->
+  <Var name="UseUnicodeNames" value="true" />     <!-- Gunakan nama Unicode -->
+  <Var name="HideStrings" value="true" />         <!-- Enkripsi string -->
+  <Var name="ControlFlowObfuscation" value="true" /> <!-- Acak alur kontrol -->
+  
+  <!-- Tingkat Agresivitas -->
+  <!-- <Var name="RenameMode" value="Normal" />            Rename maksimal -->
+  <!-- <Var name="StringEncryptionStrength" value="256" /> Kekuatan enkripsi string -->
+
+  <!-- Target DLL -->
+  <Module file="$(InPath)\SplitterMONO.dll">
+    <!-- Kecualikan class/method yang menggunakan reflection/serialization -->
+    <!-- <SkipType name="YourNamespace.YourClass" />
+    <SkipMethod name="YourNamespace.YourClass::YourMethod" />
+    <SkipField name="YourNamespace.YourClass::yourField" /> -->
+  </Module>
+
+  <!-- Logging -->
+  <Var name="LogLevel" value="Verbose" />           <!-- Log detail untuk debugging -->
+</Obfuscator>

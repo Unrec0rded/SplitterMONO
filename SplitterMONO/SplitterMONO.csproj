@@ -1,0 +1,57 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>.netstandard2.1</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>disable</Nullable>
+		<RootNamespace>SplitterMONO</RootNamespace>
+		<LangVersion>default</LangVersion>
+		<IsPackable>false</IsPackable>
+		<AssemblyVersion>1.6</AssemblyVersion>
+		<FileVersion>1.6</FileVersion>
+		<NeutralLanguage>en-US</NeutralLanguage>
+		<AssemblyName>SplitterMONO</AssemblyName>
+		<LangVersion>latest</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Reference Include="MelonLoader">
+			<HintPath>e:\Games\Schedule.I.Build.18157552\MelonLoader\net35\MelonLoader.dll</HintPath>
+		</Reference>
+		<Reference Include="0Harmony">
+			<HintPath>e:\Games\Schedule.I.Build.18157552\MelonLoader\net35\0Harmony.dll</HintPath>
+		</Reference>
+		<Reference Include="Assembly-CSharp-firstpass">
+			<HintPath>e:\Games\Schedule.I.Build.18157552\Schedule I_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+		</Reference>
+		<Reference Include="Assembly-CSharp">
+			<HintPath>e:\Games\Schedule.I.Build.18157552\Schedule I_Data\Managed\Assembly-CSharp.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.CoreModule">
+			<HintPath>e:\Games\Schedule.I.Build.18157552\Schedule I_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine">
+			<HintPath>e:\Games\Schedule.I.Build.18157552\Schedule I_Data\Managed\UnityEngine.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.InputLegacyModule">
+			<HintPath>e:\Games\Schedule.I.Build.18157552\Schedule I_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.InputModule">
+			<HintPath>e:\Games\Schedule.I.Build.18157552\Schedule I_Data\Managed\UnityEngine.InputModule.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+	<PropertyGroup>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Include="*.cs" />
+	</ItemGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Exec Command="COPY &quot;$(TargetPath)&quot; &quot;e:\Games\Schedule.I.Build.18157552\Mods&quot;" />
+	</Target>
+</Project>
