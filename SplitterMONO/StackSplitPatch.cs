@@ -19,94 +19,103 @@ namespace Splitter
 
         private static void HandleLeftClickSplit(ItemUIManager __instance)
         {
+            if (__instance == null) return;
+
             bool flag = wheelCachedSlot?.ItemInstance?.GetItemData().ID.ToLower() == "cash";
             if (Input.GetMouseButtonDown(0) && Input.GetKey(SplitKey) && !flag)
             {
                 leftClickCachedSlot = __instance.HoveredSlot?.assignedSlot;
-                ItemInstance itemInstance = leftClickCachedSlot?.ItemInstance;
-                ItemData itemData = itemInstance?.GetItemData();
+                if (leftClickCachedSlot == null) return;
 
-                if (leftClickCachedSlot != null && itemData != null)
-                {
-                    int newAmount = (itemData.Quantity == 1) ? 1 
+                ItemInstance itemInstance = leftClickCachedSlot.ItemInstance;
+                if (itemInstance == null || itemInstance is CashInstance) return;
+
+                ItemData itemData = itemInstance.GetItemData();
+                if (itemData == null) return;
+
+                int newAmount = (itemData.Quantity == 1) 
+                    ? 1 
                     : RoundUp 
-                        ? (int)Mathf.Ceil(itemData.Quantity / 2f)
-                        : (int)Mathf.Floor(itemData.Quantity / 2f);
-                        
-                    
-                    _setDraggedAmountMethod.Invoke(__instance, new object[] { newAmount });
-                    // LogScrollAction(itemData.Quantity, newAmount, itemData.Quantity);
-                }
+                        ? Mathf.CeilToInt(itemData.Quantity / 2f) 
+                        : Mathf.FloorToInt(itemData.Quantity / 2f);
+
+                _setDraggedAmountMethod.Invoke(__instance, new object[] { newAmount });
             }
-            else if (Input.GetMouseButtonUp(0))
+            else if (Input.GetMouseButtonUp(0) || flag)
             {                
                 leftClickCachedSlot = null;
             }
         }
 
-    private static void HandleWheelSplit(ItemUIManager __instance)
-    {
-        bool flag = wheelCachedSlot?.ItemInstance?.GetItemData().ID.ToLower() == "cash";
-        if (Input.GetMouseButtonDown(1) && Input.GetKey(SplitKey))
+        private static void HandleWheelSplit(ItemUIManager __instance)
         {
-            wheelCachedSlot = __instance.HoveredSlot?.assignedSlot;
-            wheelRightClickHeld = true;
-        }
-        else if (Input.GetMouseButtonUp(1) && !flag)
-        {
-            wheelRightClickHeld = false;
-            wheelCachedSlot = null;
-        }
-        
-        float scroll = Input.mouseScrollDelta.y;
-        if (Mathf.Abs(scroll) < 0.01f) return;
+            if (__instance == null) return;
 
-        int currentAmount = (int)_draggedAmount.GetValue(__instance);
-        if (currentAmount <= 0) return;
-
-        int maxSplit = 999;
-        int direction = scroll > 0 ? 1 : -1;
-        int step = SplitStep;
-
-        ItemInstance itemInstance = wheelCachedSlot?.ItemInstance;
-        if (itemInstance?.GetItemData() is ItemData itemData)
-        {
-            if (itemData.Quantity <= 1)
+            bool flag = wheelCachedSlot?.ItemInstance?.GetItemData().ID.ToLower() == "cash";
+            if (Input.GetMouseButtonDown(1) && Input.GetKey(SplitKey) && !flag)
             {
-                _setDraggedAmountMethod.Invoke(__instance, new object[] { 1 });
+                wheelCachedSlot = __instance.HoveredSlot?.assignedSlot;
+                wheelRightClickHeld = true;
+            }
+            else if (Input.GetMouseButtonUp(1) || flag)
+            {
+                wheelRightClickHeld = false;
+                wheelCachedSlot = null;
+            }
+            
+            float scroll = Input.mouseScrollDelta.y;
+            if (Mathf.Abs(scroll) < 0.01f) return;
+
+            int currentAmount = (int)_draggedAmount.GetValue(__instance);
+            if (currentAmount <= 0) return;
+
+            // Validasi wheelCachedSlot dan ItemInstance
+            if (wheelCachedSlot == null || wheelCachedSlot.ItemInstance == null)
+            {
                 return;
             }
-            maxSplit = Mathf.Max(itemData.Quantity - 1, 1);            
-        }
-        
-        int newAmount = CalculateNewAmount(currentAmount, direction, step, maxSplit);
-        int maxQuantity = wheelCachedSlot?.ItemInstance?.GetItemData().Quantity ?? 0;
-        // int itemInSlot = (int)_hoveredSlot.GetValue(__instance);
 
-        if (!ConsumeAllIfBelowStep && direction > 0 && newAmount % step != 0)
-        {
-            newAmount =  currentAmount - 1;
-            _setDraggedAmountMethod.Invoke(__instance, new object[] { newAmount });
-            // LogScrollAction(newAmount, newAmount, maxQuantity+1);
-            return;
+            ItemInstance itemInstance = wheelCachedSlot.ItemInstance;
+            if (itemInstance is CashInstance) return;
+
+            ItemData itemData = itemInstance.GetItemData();
+            if (itemData == null)
+            {
+                return;
+            }
+
+            int maxSplit = 999;
+            if (itemData.Quantity >= 1)
+            {
+                maxSplit = Mathf.Max(itemData.Quantity - 1, 1);
+            }
+
+            if (itemData.Quantity == 1) return;
+
+            int direction = scroll > 0 ? 1 : -1;
+            int step = SplitStep;
+
+            int newAmount = CalculateNewAmount(currentAmount, direction, step, maxSplit);
+
+            if (!ConsumeAllIfBelowStep && newAmount % step != 0 && direction > 0)
+            {
+                _setDraggedAmountMethod.Invoke(__instance, new object[] { currentAmount - 1 });
+                return;
+            }
+            else if (ConsumeAllIfBelowStep && !OneByOne && newAmount % step != 0 && direction > 0)
+            {
+                
+                _setDraggedAmountMethod.Invoke(__instance, new object[] { Mathf.Min(currentAmount + maxSplit, itemData.Quantity) });
+                return;
+            }
+            else if (ConsumeAllIfBelowStep && newAmount % step != 0 && direction > 0)
+            {
+                return;
+            }
+            _setDraggedAmountMethod.Invoke(__instance, new object[] { newAmount });  
+            // if (DebugLogs)
+                // LogScrollAction(currentAmount, newAmount, maxSplit);
         }
-        else if (ConsumeAllIfBelowStep && !OneByOne && direction > 0 && newAmount % step != 0)
-        {
-            newAmount = Mathf.Min(currentAmount + maxSplit, maxQuantity);
-            _setDraggedAmountMethod.Invoke(__instance, new object[] { newAmount });
-            // LogScrollAction(currentAmount, newAmount, maxSplit);
-            return;
-        }
-        else if (ConsumeAllIfBelowStep && direction > 0 && newAmount % step != 0)
-        {
-            return;
-        }
-        _setDraggedAmountMethod.Invoke(__instance, new object[] { newAmount });
-        
-        
-        // if (DebugLogs)
-            // LogScrollAction(currentAmount, newAmount, maxSplit);
-    }
         private static int CalculateNewAmount(int current, int direction, int step, int max)
         {
             if (direction > 0)
